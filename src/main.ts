@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { logger } from './common/middlewares/logger.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,6 +11,9 @@ async function bootstrap() {
 
   // Centralized exception handling
   app.useGlobalFilters(new AllExceptionsFilter());
+
+  // Centralized request logging
+  app.use(logger);
 
   // API documentation
   const swaggerConfig = new DocumentBuilder()
