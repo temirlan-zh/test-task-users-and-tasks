@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User, UserEntity } from './user.entity';
+import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { EmailExistsException } from './exceptions';
@@ -9,8 +9,8 @@ import { EmailExistsException } from './exceptions';
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(UserEntity)
-    private usersRepository: Repository<UserEntity>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -34,8 +34,6 @@ export class UsersService {
       ...rest,
     });
 
-    const { password: _, ...result } = await this.usersRepository.save(user);
-
-    return result;
+    return this.usersRepository.save(user);
   }
 }

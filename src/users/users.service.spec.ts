@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { UserEntity } from './user.entity';
+import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Role } from 'src/common/enums/role.enum';
 
@@ -19,7 +19,7 @@ describe('UsersService', () => {
       providers: [
         UsersService,
         {
-          provide: getRepositoryToken(UserEntity),
+          provide: getRepositoryToken(User),
           useValue: mockUsersRepository,
         },
       ],
