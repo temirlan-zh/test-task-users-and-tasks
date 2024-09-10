@@ -18,6 +18,6 @@ export class User {
   password: string;
 
   @Column({ default: Role.User })
-  @ApiProperty({ example: Role.User })
+  @ApiProperty({ enum: Role })
   role: Role;
 }

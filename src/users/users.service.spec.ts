@@ -9,6 +9,7 @@ describe('UsersService', () => {
   let service: UsersService;
 
   const mockUsersRepository = {
+    find: jest.fn().mockResolvedValue([]),
     findOne: jest.fn().mockResolvedValue(null),
     create: jest.fn((data) => ({ role: Role.User, ...data, id: 'some-id' })),
     save: jest.fn((entity) => Promise.resolve(entity)),
@@ -66,6 +67,26 @@ describe('UsersService', () => {
         password: expect.any(String),
         role: Role.Admin,
       });
+    });
+  });
+
+  describe('findAll', () => {
+    it('should return all users', async () => {
+      const users: User[] = [
+        {
+          id: 'some-id',
+          email: 'test@example.com',
+          password: 'some-pass',
+          role: Role.User,
+        },
+      ];
+
+      mockUsersRepository.find.mockResolvedValueOnce(users);
+
+      const result = await service.findAll();
+
+      expect(result).toEqual(users);
+      expect(mockUsersRepository.find).toHaveBeenCalledWith();
     });
   });
 });
