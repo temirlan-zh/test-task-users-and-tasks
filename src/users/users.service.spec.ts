@@ -9,6 +9,7 @@ import { SortBy } from './enums/sort-by.enum';
 import { SortOrder } from 'src/common/enums/sort-order.enum';
 import { PaginatedDto } from 'src/common/dto/paginated.dto';
 import { filter, sortBy } from 'lodash';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -124,6 +125,30 @@ describe('UsersService', () => {
       expect(result).toEqual(user);
       expect(mockUsersRepository.findOneBy).toHaveBeenCalledWith({
         id: user.id,
+      });
+    });
+  });
+
+  describe('update', () => {
+    it('should update user', async () => {
+      const user = mockUsers[0];
+      const update: UpdateUserDto = {
+        email: 'new-email@example.com',
+        password: 'new-pass',
+        role: Role.User,
+      };
+      const updatedUser: User = { ...user, ...update, password: 'hashed-pass' };
+
+      jest.spyOn(service, 'findOne').mockResolvedValueOnce(user);
+      mockUsersRepository.save.mockResolvedValueOnce(updatedUser);
+
+      const result = await service.update(user.id, update);
+
+      expect(result).toEqual(updatedUser);
+      expect(mockUsersRepository.save).toHaveBeenCalledWith({
+        ...user,
+        ...update,
+        password: expect.any(String),
       });
     });
   });

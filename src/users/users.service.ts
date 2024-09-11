@@ -9,6 +9,7 @@ import { PaginatedDto } from 'src/common/dto/paginated.dto';
 import { SortBy } from './enums/sort-by.enum';
 import { SortOrder } from 'src/common/enums/sort-order.enum';
 import { Role } from 'src/common/enums/role.enum';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 export const PAGE_LIMIT = 10;
 
@@ -85,5 +86,34 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  async update(id: User['id'], updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(id);
+
+    const { password, email, role } = updateUserDto;
+
+    if (email) {
+      if (user.email !== email) {
+        const existingUser = await this.usersRepository.findOne({
+          where: { email },
+        });
+        if (existingUser) {
+          throw new EmailExistsException();
+        }
+
+        user.email = email;
+      }
+    }
+
+    if (password) {
+      user.password = await bcrypt.hash(password, 10);
+    }
+
+    if (role) {
+      user.role = role;
+    }
+
+    return this.usersRepository.save(user);
   }
 }

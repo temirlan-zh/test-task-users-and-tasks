@@ -8,6 +8,7 @@ import {
   DefaultValuePipe,
   Param,
   ParseUUIDPipe,
+  Patch,
 } from '@nestjs/common';
 import { PAGE_LIMIT, UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -30,6 +31,7 @@ import { PaginatedDto } from 'src/common/dto/paginated.dto';
 import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response.decorator';
 import { SortBy } from './enums/sort-by.enum';
 import { Role } from 'src/common/enums/role.enum';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 @ApiTags('users')
@@ -101,5 +103,20 @@ export class UsersController {
   @ApiExceptions(new UserNotFoundException())
   findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.usersService.findOne(id);
+  }
+
+  @Patch(':id')
+  @ApiOkResponse({ type: User })
+  @ApiExceptions(
+    new UserNotFoundException(),
+    new EmailExistsException(),
+    new PasswordRegexException(),
+    new EmailRegexException(),
+  )
+  update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.usersService.update(id, updateUserDto);
   }
 }
