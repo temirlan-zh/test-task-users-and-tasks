@@ -29,6 +29,7 @@ describe('UsersService', () => {
     create: jest.fn((data) => ({ role: Role.User, ...data, id: 'some-id' })),
     save: jest.fn((entity) => Promise.resolve(entity)),
     createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
+    delete: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -150,6 +151,16 @@ describe('UsersService', () => {
         ...update,
         password: expect.any(String),
       });
+    });
+  });
+
+  describe('delete', () => {
+    it('should delete user by id', async () => {
+      const id = 'some-id';
+
+      await service.remove(id);
+
+      expect(mockUsersRepository.delete).toHaveBeenCalledWith(id);
     });
   });
 });

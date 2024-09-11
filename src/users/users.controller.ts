@@ -9,6 +9,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { PAGE_LIMIT, UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -118,5 +119,11 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.usersService.update(id, updateUserDto);
+  }
+
+  @Delete(':id')
+  @ApiOkResponse()
+  remove(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.usersService.remove(id);
   }
 }
