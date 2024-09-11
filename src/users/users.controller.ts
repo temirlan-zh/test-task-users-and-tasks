@@ -6,15 +6,23 @@ import {
   Query,
   ParseIntPipe,
   DefaultValuePipe,
+  Param,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { PAGE_LIMIT, UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './user.entity';
-import { ApiCreatedResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { User } from './entities/user.entity';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   EmailExistsException,
   EmailRegexException,
   PasswordRegexException,
+  UserNotFoundException,
 } from './exceptions';
 import { ApiExceptions } from 'src/common/decorators/api-exceptions.decorator';
 import { SortOrder } from 'src/common/enums/sort-order.enum';
@@ -86,5 +94,12 @@ export class UsersController {
       { sortBy, order },
       { page, limit },
     );
+  }
+
+  @Get(':id')
+  @ApiOkResponse({ type: User })
+  @ApiExceptions(new UserNotFoundException())
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.usersService.findOne(id);
   }
 }

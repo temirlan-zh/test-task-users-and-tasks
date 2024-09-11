@@ -1,5 +1,5 @@
 import { Role } from 'src/common/enums/role.enum';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 
 export const mockUsers: User[] = [
   {

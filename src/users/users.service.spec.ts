@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Role } from 'src/common/enums/role.enum';
 import { mockUsers } from './mocks';
@@ -24,6 +24,7 @@ describe('UsersService', () => {
   const mockUsersRepository = {
     find: jest.fn().mockResolvedValue([]),
     findOne: jest.fn().mockResolvedValue(null),
+    findOneBy: jest.fn().mockResolvedValue(null),
     create: jest.fn((data) => ({ role: Role.User, ...data, id: 'some-id' })),
     save: jest.fn((entity) => Promise.resolve(entity)),
     createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
@@ -109,6 +110,21 @@ describe('UsersService', () => {
         totalPages: Math.ceil(total / limit),
       });
       expect(mockUsersRepository.createQueryBuilder).toHaveBeenCalled();
+    });
+  });
+
+  describe('findOne', () => {
+    it('should find user by id', async () => {
+      const user = mockUsers[0];
+
+      mockUsersRepository.findOneBy.mockResolvedValueOnce(user);
+
+      const result = await service.findOne(user.id);
+
+      expect(result).toEqual(user);
+      expect(mockUsersRepository.findOneBy).toHaveBeenCalledWith({
+        id: user.id,
+      });
     });
   });
 });

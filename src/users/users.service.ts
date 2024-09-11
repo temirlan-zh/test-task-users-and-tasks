@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
-import { EmailExistsException } from './exceptions';
+import { EmailExistsException, UserNotFoundException } from './exceptions';
 import { PaginatedDto } from 'src/common/dto/paginated.dto';
 import { SortBy } from './enums/sort-by.enum';
 import { SortOrder } from 'src/common/enums/sort-order.enum';
@@ -75,5 +75,15 @@ export class UsersService {
       totalPages: Math.ceil(total / limit),
       results,
     };
+  }
+
+  async findOne(id: User['id']): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new UserNotFoundException();
+    }
+
+    return user;
   }
 }
