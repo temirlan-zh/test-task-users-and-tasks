@@ -4,15 +4,29 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Role } from 'src/common/enums/role.enum';
+import { mockUsers } from './mocks';
+import { SortBy } from './enums/sort-by.enum';
+import { SortOrder } from 'src/common/enums/sort-order.enum';
+import { PaginatedDto } from 'src/common/dto/paginated.dto';
+import { filter, sortBy } from 'lodash';
 
 describe('UsersService', () => {
   let service: UsersService;
+
+  const mockQueryBuilder = {
+    andWhere: jest.fn().mockReturnThis(),
+    orderBy: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    take: jest.fn().mockReturnThis(),
+    getManyAndCount: jest.fn().mockResolvedValue([mockUsers, mockUsers.length]),
+  };
 
   const mockUsersRepository = {
     find: jest.fn().mockResolvedValue([]),
     findOne: jest.fn().mockResolvedValue(null),
     create: jest.fn((data) => ({ role: Role.User, ...data, id: 'some-id' })),
     save: jest.fn((entity) => Promise.resolve(entity)),
+    createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
   };
 
   beforeEach(async () => {
@@ -71,22 +85,30 @@ describe('UsersService', () => {
   });
 
   describe('findAll', () => {
-    it('should return all users', async () => {
-      const users: User[] = [
-        {
-          id: 'some-id',
-          email: 'test@example.com',
-          password: 'some-pass',
-          role: Role.User,
-        },
-      ];
+    it('should return a list of users with pagination, filtering, and sorting', async () => {
+      const role = Role.Admin;
+      const sort = SortBy.Email;
+      const page = 1;
+      const limit = 1;
+      const users = sortBy(filter(mockUsers, { role }), sort);
+      const total = users.length;
 
-      mockUsersRepository.find.mockResolvedValueOnce(users);
+      mockQueryBuilder.getManyAndCount.mockResolvedValueOnce([users, total]);
 
-      const result = await service.findAll();
+      const result = await service.findAll(
+        { role },
+        { sortBy: sort, order: SortOrder.ASC },
+        { page, limit },
+      );
 
-      expect(result).toEqual(users);
-      expect(mockUsersRepository.find).toHaveBeenCalledWith();
+      expect(result).toEqual<PaginatedDto<User>>({
+        results: users,
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      });
+      expect(mockUsersRepository.createQueryBuilder).toHaveBeenCalled();
     });
   });
 });

@@ -1,14 +1,27 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
-import { UsersService } from './users.service';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Query,
+  ParseIntPipe,
+  DefaultValuePipe,
+} from '@nestjs/common';
+import { PAGE_LIMIT, UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.entity';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   EmailExistsException,
   EmailRegexException,
   PasswordRegexException,
 } from './exceptions';
 import { ApiExceptions } from 'src/common/decorators/api-exceptions.decorator';
+import { SortOrder } from 'src/common/enums/sort-order.enum';
+import { PaginatedDto } from 'src/common/dto/paginated.dto';
+import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response.decorator';
+import { SortBy } from './enums/sort-by.enum';
+import { Role } from 'src/common/enums/role.enum';
 
 @Controller('users')
 @ApiTags('users')
@@ -27,8 +40,51 @@ export class UsersController {
   }
 
   @Get()
-  @ApiOkResponse({ type: [User] })
-  async findAll(): Promise<User[]> {
-    return this.usersService.findAll();
+  @ApiQuery({ name: 'email', required: false, description: 'Filter by email' })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    enum: Role,
+    description: 'Filter by role',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: SortBy,
+    description: `Sort by (default: ${SortBy.Email})`,
+  })
+  @ApiQuery({
+    name: 'order',
+    required: false,
+    enum: SortOrder,
+    description: `Sort order (default: ${SortOrder.ASC})`,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: `Items per page (default: ${PAGE_LIMIT})`,
+  })
+  @ApiPaginatedResponse(User)
+  async findAll(
+    @Query('email') email?: string,
+    @Query('role') role?: Role,
+    @Query('sortBy') sortBy: SortBy = SortBy.Email,
+    @Query('order') order: SortOrder = SortOrder.ASC,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('limit', new DefaultValuePipe(PAGE_LIMIT), ParseIntPipe)
+    limit?: number,
+  ): Promise<PaginatedDto<User>> {
+    return this.usersService.findAll(
+      { email, role },
+      { sortBy, order },
+      { page, limit },
+    );
   }
 }
