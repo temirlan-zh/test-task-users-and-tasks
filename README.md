@@ -11,15 +11,15 @@ Technologies used:
 
 ESLint/Prettier run pre-commit by _husky_ and _lint-staged_.
 
-Implemented _filtering_, _sorting_ and _paging_ for querying users.
+Implemented _filtering_, _sorting_ and _paging_ when querying users.
 
-Centralized error handling is implemented using [exception filters](https://docs.nestjs.com/exception-filters).
+Centralized error handling is implemented using [an exception filter](src/common/filters/all-exceptions.filter.ts).
 
-Centralized request logging is implemented using [middleware](https://docs.nestjs.com/middleware).
+Centralized request logging is implemented using [a middleware](src/common/middlewares/logger.middleware.ts).
 
-API documentation is implemented using [OpenAPI](https://docs.nestjs.com/openapi/introduction).
+API documentation is implemented using _OpenAPI_.
 
-Email and password regex checking is implemented using _DTO_.
+Email and password regex checking is implemented via [a DTO](src/users/dto/create-user.dto.ts).
 
 ## Installation
 
