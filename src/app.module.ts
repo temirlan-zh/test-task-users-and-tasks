@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
       inject: [ConfigService],
     }),
     UsersModule,
+    TasksModule,
   ],
   providers: [
     {
